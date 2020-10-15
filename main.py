@@ -1,0 +1,1 @@
+#Inicializar recursos e interface (?)
