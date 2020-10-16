@@ -5,4 +5,3 @@ class Memory:
         self.rq0 = []
         self.rq1 = []
         self.rq2 = []
-        
