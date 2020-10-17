@@ -8,7 +8,10 @@ class Scheduler:
         pass
 
     def chooseNext(memory):
-        if (memory.criticalProcesses):
-            return memory.criticalProcesses[0]
-        
-        #checar filas usando política de feedback
+        return memory.criticalProcesses[0] if memory.criticalProcesses
+        return memory.rq0[0] if memory.rq0
+        return memory.rq1[0] if memory.rq1
+        return memory.rq2[0] if memory.rq2
+    #quantum = 2
+
+    

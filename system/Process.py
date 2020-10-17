@@ -10,7 +10,8 @@ class ProcessState(Enum):
     BLOCKED = auto()
 
 class Process:
-    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk):
+
+    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk, memory):
         self.id = id
         self.priority = priority
         self.arrivalTime = arrivalTime
@@ -19,4 +20,4 @@ class Process:
         self.printers = printers
         self.disk = disk
         self.currentStatus = ProcessState.NEW
-
+        
