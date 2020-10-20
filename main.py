@@ -29,8 +29,8 @@ def loop(memory, sort_p):
     while True: #loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
 
         #checar se há processo crítico -> Scheduler
-        if (memory.criticalProcesses[0].state != RUNNING):  #alteracoes necessárias para mudar estado do processo corrente
-            memory.criticalProcesses[0].state = RUNNING
+        if (memory.criticalProcesses[0].state != ProcessState.RUNNING):  #alteracoes necessárias para mudar estado do processo corrente
+            memory.criticalProcesses[0].state = ProcessState.RUNNING
             for rq in memory.rq:
                 if (rq[0]): #caso a fila não esteja vazia
                     rq[0].state = ProcessState.READY
