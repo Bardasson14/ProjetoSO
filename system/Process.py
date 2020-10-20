@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ProcessState(Enum):
     NEW = auto()
     READY_SUSPENDED = auto()
@@ -11,7 +12,8 @@ class ProcessState(Enum):
 
 class Process:
 
-    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk, memory):
+    #criacao de Process será pelo Dispatcher
+    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk):
         self.id = id
         self.priority = priority
         self.arrivalTime = arrivalTime
