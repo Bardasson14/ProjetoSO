@@ -1,4 +1,5 @@
 #adicionar imports
+from system import System, Dispatcher, Scheduler
 QUANTUM = 2
 
 def main():
