@@ -6,7 +6,7 @@ class ProcessState(Enum):
     READY_SUSPENDED = auto()
     READY = auto()
     RUNNING = auto()
-    FINISH = auto()
+    FINISHED = auto()
     SUSPENDED_BLOCKED = auto()
     BLOCKED = auto()
 
@@ -22,4 +22,4 @@ class Process:
         self.printers = printers
         self.disk = disk
         self.currentStatus = ProcessState.NEW
-        
+        self.currentStatusTime = 0

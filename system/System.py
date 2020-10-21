@@ -9,3 +9,5 @@ class System:
         self.printers = [Printer(), Printer()]
         self.disks = [Disk(), Disk()]
         self.memory = Memory()
+        self.readySuspendedProcesses = []
+        self.blockedSuspendedProcesses = [] 

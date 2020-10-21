@@ -1,6 +1,5 @@
 #adicionar imports
 from system import System, Dispatcher, Scheduler
-QUANTUM = 2
 
 def main():
     system = System()
@@ -21,34 +20,28 @@ def main():
             p.append(newInput)
     sort_p = p.sort(key = lambda x: x['arrivalTime']) 
     #adicionar a vetor auxiliar ordenado p/ ordem de chegada do processo
-    loop(system.memory, sort_p)
+    loop(system, sort_p)
 
-
-"""           
-def loop(memory, sort_p):
+           
+def loop(system, sort_p):
+    memory = system.memory
+    cpus = system.CPUs
     scheduler = Scheduler()
     dispatcher = Dispatcher()
 
     
     while True: #loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
 
+        #PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
+        scheduler.checkFinished(cpus)
+
         #checar se há processo crítico -> Scheduler
-        if (memory.criticalProcesses[0].state != ProcessState.RUNNING):  #alteracoes necessárias para mudar estado do processo corrente
-            memory.criticalProcesses[0].state = ProcessState.RUNNING
-            for rq in memory.rq:
-                if (rq[0]): #caso a fila não esteja vazia
-                    rq[0].state = ProcessState.READY
-                    #mover o processo corrente de fila?
+        scheduler.searchCriticalProcesses(memory, cpus, dispatcher)
 
-        #chegada de processo no sistema
-        if (sort_p[0].arrivalTime == current_time):
-            #priority = 0 -> critical
-            #prority = 1 -> user
-            processInput = sort_p.pop(0)
-            newProcess = dispatcher.createProcess(processInput['arrivalTime'], processInput['priority'], processInput['serviceTime'], processInput['size'], processInput['printers'], processInput['disk'])
-            dispatcher.addNewToQueue(newProcess, memory)
+        #checar se existem novos processos p/serem admitidos no sistema (currentTime ainda não foi implementado)
+        scheduler.checkEntries(sort_p, currentTime, dispatcher)
 
-        if (current_time % QUANTUM == 0):
-            #realizar swapping de processos
+        #checar processos em execução para realizar preempcao, se necessário (apenas em processos de user)
+        scheduler.checkQuantum(system, currentTime, dispatcher)
 
-"""
+        #ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
