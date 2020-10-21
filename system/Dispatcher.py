@@ -7,7 +7,7 @@ class Dispatcher:
         pass
 
     def createProcess(arrivalTime, priority, serviceTime, size, printers, disk):
-        id = ''.join(choice(ascii_lowercase) for i in range(10))
+        id = ''.join(choice(ascii_lowercase) for i in range(10)) #incremental (?)
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk, memory)
 
     def addNewToQueue(process, memory):

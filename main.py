@@ -19,13 +19,16 @@ def main():
                 "disk": disk
             }
             p.append(newInput)
-    sort_p = p.sort(key = lambda x: x['arrivalTime']) #adicionar a vetor auxiliar ordenado p/ ordem de chegada do processo
+    sort_p = p.sort(key = lambda x: x['arrivalTime']) 
+    #adicionar a vetor auxiliar ordenado p/ ordem de chegada do processo
     loop(system.memory, sort_p)
-            
+
+
+"""           
 def loop(memory, sort_p):
     scheduler = Scheduler()
     dispatcher = Dispatcher()
-    memory = system.memory
+
     
     while True: #loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
 
@@ -38,12 +41,14 @@ def loop(memory, sort_p):
                     #mover o processo corrente de fila?
 
         #chegada de processo no sistema
-        if (sort_p[0].arrivalTime == """current_time"""):
+        if (sort_p[0].arrivalTime == current_time):
             #priority = 0 -> critical
             #prority = 1 -> user
             processInput = sort_p.pop(0)
             newProcess = dispatcher.createProcess(processInput['arrivalTime'], processInput['priority'], processInput['serviceTime'], processInput['size'], processInput['printers'], processInput['disk'])
             dispatcher.addNewToQueue(newProcess, memory)
 
-        if not ("""current_time""" % QUANTUM):
+        if (current_time % QUANTUM == 0):
             #realizar swapping de processos
+
+"""

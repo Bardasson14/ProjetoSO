@@ -12,6 +12,9 @@ class Scheduler:
         return memory.rq0[0] if memory.rq0
         return memory.rq1[0] if memory.rq1
         return memory.rq2[0] if memory.rq2
-    #quantum = 2
 
+    def checkFinished (cpus):
+        pass    #checar em todas as cpus se processo foi finalizado
+
+    
     
