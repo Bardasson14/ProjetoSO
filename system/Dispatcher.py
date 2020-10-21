@@ -10,7 +10,7 @@ class Dispatcher:
         id = ''.join(choice(ascii_letters) for i in range(10))
         if ((priority == 1 and size<=512) or (priority==0)) and (memory.avaliableMemory >= process.size):
             memory.avaliableMemory -= process.size
-        return Process(id, arrivalTime, priority, serviceTime, size, printers, disk, memory)
+        return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
     def addNewToQueue(process, memory):
         memory.criticalProcesses.append(newProcess) if newProcess.priority == 0 else memory.rq0.append(newProcess) #adicionando à fila apropriada
