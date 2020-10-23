@@ -1,6 +1,6 @@
 from random import choice
 from string import ascii_letters
-import Process.py
+from . import Process
 
 class Dispatcher:
     def __init__(self):
@@ -19,10 +19,11 @@ class Dispatcher:
         process = queue.pop(0)
         process.currentStatus = ProcessState.RUNNING
         cpu.currentProcess = process
-            
+
     def finishProcess(cpu):
         cpu.currentProcess.currentStatus = ProcessState.FINISHED
         cpu.currentProcess = None
-        
+
     def stopProcess(cpu):
         #adicionar atributo de 'lastqueue' para poder devolver processo a fila posterior (rqi+1) à última, seguindo a política de feedback
+        pass

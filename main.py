@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# the line above allow us to run this file as './main.py' in *nix systems
+# don't worry, the rest of the systems will only see it as a normal comment :)
+
 #adicionar imports
 from system import System, Dispatcher, Scheduler
 

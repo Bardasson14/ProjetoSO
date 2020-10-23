@@ -1,4 +1,4 @@
-import Resource.py
+from .Resource import Resource
 
 class Printer(Resource):
     pass

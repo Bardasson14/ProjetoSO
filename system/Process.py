@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class ProcessState(Enum):
-    NEW = auto()
-    READY_SUSPENDED = auto()
-    READY = auto()
-    RUNNING = auto()
-    FINISHED = auto()
-    SUSPENDED_BLOCKED = auto()
-    BLOCKED = auto()
+    NEW = 1
+    READY_SUSPENDED = 2
+    READY = 3
+    RUNNING = 4
+    FINISHED = 5
+    SUSPENDED_BLOCKED = 6
+    BLOCKED = 7
 
 class Process:
 
