@@ -1,4 +1,4 @@
-from .Resource import Resource
+from .resource import Resource
 
 class Disk(Resource):
     pass
