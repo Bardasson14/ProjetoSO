@@ -12,19 +12,35 @@ class Dispatcher:
             memory.avaliableMemory -= size
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
-    def addNewToQueue(self, process, memory):
+    def admitProcess(self, process, memory):
         memory.criticalProcesses.append(process) if process.priority == 0 else memory.rq0.append(process)
 
-    def dispatchProcess(self, cpu, queue):
-        process = queue.pop(0)
+    def dispatchProcess(self, cpu, memory, queue):
+
+        if (0<=queue<=2):
+            process = memory.rq[queue].pop(0)
+        else:
+            process= memory.criticalProcesses.pop(0)
+
         process.currentStatus = ProcessState.RUNNING
-        cpu.empty = False
+        process.currentStatusTime = 0
         cpu.currentProcess = process
+        cpu.lastQueueIndex = queue
+        cpu.empty = False
 
     def finishProcess(self, cpu):
         cpu.currentProcess.currentStatus = ProcessState.FINISHED
-        cpu.currentProcess = None
-
-    def interruptProcess(self, cpu):
-        #adicionar atributo de 'lastqueue' para poder devolver processo a fila posterior (rqi+1) à última, seguindo a política de feedback
-        pass
+        cpu.reset()
+        
+    def interruptProcess(self, cpu, memory, scheduler):
+        cpu.currentProcess.currentStatus = ProcessState.READY
+        cpu.currentProcess.currentStatusTime = 0
+        processQueueIndex = scheduler.getProcessQueue(cpu.currentProcess.id, memory) #só vale para processos de usuário, que podem ser interrompidos
+        targetQueue = cpu.lastQueueIndex
+        if (targetQueue == 2):
+            targetQueue = 0
+        else:
+            targetQueue +=1
+        memory.rq[targetQueue].append(cpu.currentProcess)
+        #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
+        cpu.reset()

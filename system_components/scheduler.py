@@ -15,46 +15,73 @@ class Scheduler:
 
     def checkFinished(self, cpus, dispatcher):
         for cpu in cpus:
-            currentProcess = cpu.currentProcess
-            if ((currentProcess != None) and (currentProcess.currentStatusTime == currentProcess.serviceTime)):
-                dispatcher.finishProcess(cpu, currentProcess)
+            if (not cpu.empty and (cpu.currentProcess.serviceTimeLeft == 0)):
+                dispatcher.finishProcess(cpu)
+            
+    def getProcessQueue(self, id, memory):
+        for i in range (len(memory.rq)):
+                for process in memory.rq[i]:
+                    if process.id == id:
+                        return i
+
+    def manageReadyQueues(self, memory, cpus, dispatcher):
+        #checar ready queues até encaixar o máximo possível de processos de usuário
+        _avaliableCPUIndex = self.checkAvaliableCPUS(cpus, False)
+        while (_avaliableCPUIndex):
+            nextProcess = self.chooseNext(memory)
+            if not nextProcess:
+                return
+            nextProcessQueue = self.getProcessQueue(nextProcess.id, memory)
+            dispatcher.dispatchProcess(cpus[_avaliableCPUIndex], memory, nextProcessQueue)
+            _avaliableCPUIndex = self.checkAvaliableCPUS(cpus, False)
                 
-    def searchCriticalProcesses(self, memory, cpus, dispatcher):
+    def checkAvaliableCPUS(self, cpus, userProcessesIncluded):
+        #retorna primeira CPU disponível. Caso não haja nenhuma, retorna None (caso processos de usuário sejam incluidos, seu indice é retornado)
+        userProcessCPU = None
+        for i in range(len(cpus)):
+            if cpus[i].empty:
+                return i
+            userProcessCPU = i
+        if (userProcessesIncluded):
+            return userProcessCPU #priorizar a busca por CPUs vazias. Caso não haja nenhuma vazia, retornar cpu com processo de usuário
 
+
+    def manageCriticalProcesses(self, memory, cpus, dispatcher):
+        if not (memory.criticalProcesses):
+            return
+        
         for i in range(4): #NO MÁXIMO, HAVERÃO 4 CPUs DISPONÍVEIS (como a checagem é por clock, não é necessário checar mais do que 4 vezes)
-            if (memory.criticalProcesses): #processo crítico na fila
-                criticalProcess = memory.criticalProcesses[0]
-                for cpu in cpus:
-                    avaliableCPUFound = False
-                    if (cpu.currentProcess == None or cpu.currentProcess.priority == 1): 
-                        #CPU possui processo de usuário ou está vaga?
-
-                        if (cpu.currentProcess != None):
-                            #devolver processo de user para a MP
-                            #[FAZER]    
-                            pass
-
-                        #inserir criticalProcess na CPU
-                        dispatcher.dispatchProcess(cpu, memory.criticalProcesses)
-                        avaliableCPUFound = True
+            if not memory.criticalProcesses:
+                return
+            criticalProcess = memory.criticalProcesses[0]
+            avaliableCPUIndex = self.checkAvaliableCPUS(cpus, True)
+            if avaliableCPUIndex == None:
+                return #Nesse caso, não há CPU com processo de usuário nem vaga
+            if (not cpus[avaliableCPUIndex].empty): 
+                #CPU ocupada com processo de User
+                #devolver processo de user para a MP
+                #[FAZER]    
+                pass
+            #inserir criticalProcess na CPU
+            dispatcher.dispatchProcess(cpus[avaliableCPUIndex], memory, 4)
                     
-                    if (avaliableCPUFound):
-                        break #DESCULPA, VANESSA (KKKKKKKKKKKK)
             
     def checkEntries(self, jobList, currentTime, dispatcher, memory): #OK
             while (jobList and jobList[0]['arrivalTime'] == currentTime):
                 processInput = jobList.pop(0)
                 newProcess = dispatcher.createProcess(processInput['arrivalTime'], processInput['priority'], processInput['serviceTime'], processInput['size'], processInput['printers'], processInput['disk'], memory)
-                dispatcher.addNewToQueue(newProcess, memory)
+                dispatcher.admitProcess(newProcess, memory)
 
     def checkQuantum(self, system, currentTime, dispatcher): #necessário passar o sistema como param, pois existem os processos bloqueados, suspensos, etc.
-        memory = system.memory
         cpus = system.CPUs
+
+        if self.checkAvaliableCPUS(cpus, False) == None:
+            return
 
         for cpu in cpus:
             if (cpu.currentProcess and cpu.currentProcess.currentStatusTime % 2 == 0):
-                dispatcher.interruptProcess(cpu) #método ainda não implementado
-                #preempcao
-                #trocar processo atual por processo a ser escolhido pela funcao chooseNext
-
+                nextProcess = self.chooseNext(system.memory)
+                if (nextProcess):
+                    dispatcher.interruptProcess(cpu, system.memory, self) 
+                    dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
 

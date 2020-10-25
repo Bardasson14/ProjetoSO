@@ -27,48 +27,60 @@ def main():
 def loop(system, sort_p):
     scheduler = schedulerModule.Scheduler()
     dispatcher = dispatcherModule.Dispatcher()
-    i= 0
-    while i<30: #loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
+    currentTime = 0
+    while currentTime<30: #loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
+
+        #AINDA É NECESSÁRIO FAZER A VERIFICAÇÃO PARA POSSÍVEIS EVENTOS BLOQUEANTES
+        #USAR FILA DE PROCESSOS BLOQUEADOS
+
+        #CHECAR CHEGADA DE NOVOS PROCESSOS
+        scheduler.checkEntries(sort_p, currentTime, dispatcher, system.memory)
 
         #PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
         scheduler.checkFinished(system.CPUs, dispatcher)
 
+        #CHECAR QUANTUM PARA REALIZAR PREEMPÇÃO, SE NECESSÁRIO
+        scheduler.checkQuantum(system, currentTime, dispatcher)
+
         #checar se há processo crítico -> Scheduler
-        scheduler.searchCriticalProcesses(system.memory, system.CPUs, dispatcher)
+        scheduler.manageCriticalProcesses(system.memory, system.CPUs, dispatcher) #corrigir
 
-        #checar se existem novos processos p/serem admitidos no sistema (currentTime ainda não foi implementado)
-        scheduler.checkEntries(sort_p, i, dispatcher, system.memory)
+        #gerenciar filas de processos de usuário
+        scheduler.manageReadyQueues(system.memory, system.CPUs, dispatcher)
 
-        #checar processos em execução para realizar preempcao, se necessário (apenas em processos de user)
-        scheduler.checkQuantum(system, i, dispatcher)
 
-        print('-------------------------------------')
-        print('t =', i)
-        print('RQ0', system.memory.rq0)
-        print('RQ1', system.memory.rq1)
-        print('RQ2', system.memory.rq2)
-        print('CPs', system.memory.criticalProcesses)
-        print('CPU0', system.CPUs[0].currentProcess)
-        print('CPU1', system.CPUs[1].currentProcess)
-        print('CPU2', system.CPUs[2].currentProcess)
-        print('CPU3', system.CPUs[3].currentProcess)
-
+        print()
+        print('-------------------------------------\n')
+        print('t =', currentTime, '\n')
+        for i in range(len(system.memory.rq)):
+            print('RQ',i)
+            for process in system.memory.rq[i]:
+                print(process.__dict__)
+        print('Critical Processes')
+        for process in system.memory.criticalProcesses:
+            print(process.__dict__)
+        for i in range(len(system.CPUs)):
+            print('CPU',i)
+            if not system.CPUs[i].empty :
+                print(system.CPUs[i].currentProcess.__dict__)
+            
+        
         #ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
         
-        i+=1
+        currentTime+=1
 
         #ATUALIZAR TEMPO DE EXECUCAO
         
         for cpu in system.CPUs:
             if (cpu.currentProcess != None):
                 cpu.currentProcess.currentStatusTime += 1
+                cpu.currentProcess.serviceTimeLeft -= 1
 
         #ATUALIZAR TEMPO DE ESPERA DOS PROCESSOS NA MP
         
         for rqi in system.memory.rq:
             for process in rqi:
-                print('p_id:', process.id)
-                print('p_st:', process.currentStatusTime)
+                process.currentStatusTime += 1
                 
 
 main()

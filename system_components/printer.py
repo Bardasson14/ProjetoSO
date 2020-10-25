@@ -1,4 +1,6 @@
 from .resource import Resource
 
 class Printer(Resource):
-    pass
+    
+    def __init__(self):
+        pass
