@@ -41,6 +41,5 @@ class Dispatcher:
             targetQueue = 0
         else:
             targetQueue +=1
-        memory.rq[targetQueue].append(cpu.currentProcess)
         #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
         cpu.reset()

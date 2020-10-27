@@ -41,7 +41,8 @@ class Scheduler:
         for i in range(len(cpus)):
             if cpus[i].empty:
                 return i
-            userProcessCPU = i
+            if cpus[i].currentProcess.priority == 1:
+                userProcessCPU = i
         if (userProcessesIncluded):
             return userProcessCPU #priorizar a busca por CPUs vazias. Caso não haja nenhuma vazia, retornar cpu com processo de usuário
 
@@ -58,6 +59,8 @@ class Scheduler:
             if avaliableCPUIndex == None:
                 return #Nesse caso, não há CPU com processo de usuário nem vaga
             if (not cpus[avaliableCPUIndex].empty):  #CPU executando processo de usuário
+                print(avaliableCPUIndex)
+                print(cpus[avaliableCPUIndex].lastQueueIndex)
                 dispatcher.interruptProcess(cpus[avaliableCPUIndex], memory, self)
                 
             #inserir criticalProcess na CPU
@@ -77,7 +80,7 @@ class Scheduler:
             return
 
         for cpu in cpus:
-            if (cpu.currentProcess and cpu.currentProcess.currentStatusTime % 2 == 0):
+            if (cpu.currentProcess and cpu.currentProcess.priority == 1 and cpu.currentProcess.currentStatusTime % 2 == 0):
                 nextProcess = self.chooseNext(system.memory)
                 if (nextProcess):
                     dispatcher.interruptProcess(cpu, system.memory, self) 
