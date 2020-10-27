@@ -60,17 +60,17 @@ def loop(system, sort_p):
         scheduler.checkEntries(sort_p, currentTime, dispatcher, system)
 
         # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
-        scheduler.checkFinished(system.CPUs, dispatcher)
+        scheduler.checkFinished(system, dispatcher)
 
         # CHECAR QUANTUM PARA REALIZAR PREEMPÇÃO, SE NECESSÁRIO
         scheduler.checkQuantum(system, currentTime, dispatcher)
 
         # checar se há processo crítico -> Scheduler
         scheduler.manageCriticalProcesses(
-            system.memory, system.CPUs, dispatcher)  # corrigir
+            system, dispatcher)  # corrigir
 
         # gerenciar filas de processos de usuário, admitindo para a memória aqueles que possam ser executados, e suspendendo outros
-        scheduler.manageReadyQueues(system.memory, system.CPUs, dispatcher)
+        scheduler.manageReadyQueues(system, dispatcher)
 
         print()
         print('-------------------------------------\n')
@@ -86,6 +86,9 @@ def loop(system, sort_p):
             print('CPU', i)
             if not system.CPUs[i].empty:
                 print(system.CPUs[i].currentProcess.__dict__)
+        print('BLOCKED PROCESSES')
+        for process in system.memory.blockedProcesses:
+            print(process.__dict__)
 
         # ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
 

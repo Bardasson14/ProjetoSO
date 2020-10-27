@@ -2,6 +2,7 @@ from random import choice
 from string import ascii_letters
 from .process import Process, ProcessState
 
+#DISPATCHER SE COMUNICA APENAS COM MEMORIA E CPU
 class Dispatcher:
     def __init__(self):
         pass
@@ -9,14 +10,15 @@ class Dispatcher:
     def createProcess(self, arrivalTime, priority, serviceTime, size, printers, disk, memory):
         id = ''.join(choice(ascii_letters) for i in range(10))
         if ((priority == 1 and size<=512) or (priority==0)) and (memory.avaliableMemory >= size):
-            memory.avaliableMemory -= size
+            memory.avaliableMemory -= size #PRECISARÁ SER MODIFICADO    
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
     def dispatchProcess(self, cpu, memory, queue):
-        if (0<=queue<=2):
-            process = memory.rq[queue].pop(0)
+        print('nq', queue)
+        if (queue != None):
+            process = memory.rq[queue].pop(0) 
         else:
-            process= memory.criticalProcesses.pop(0)
+            process = memory.criticalProcesses.pop(0)
 
         process.currentStatus = ProcessState.RUNNING
         process.currentStatusTime = 0
@@ -41,3 +43,9 @@ class Dispatcher:
         #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
         cpu.reset()
 
+    def blockProcesss(self, memory, queue):
+        process = memory.rq[queue].pop(0) #apenas processos de usuário podem ser bloqueados, já que processos críticos são CPU-bound
+        process.currentStatus = ProcessState.BLOCKED
+        process.currentStatusTime = 0
+        memory.blockedProcesses.append(process)
+            
