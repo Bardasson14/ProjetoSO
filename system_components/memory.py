@@ -8,3 +8,5 @@ class Memory:
         self.rq2 = []
         self.rq = [self.rq0, self.rq1, self.rq2]
         self.blockedProcesses = []
+        self.blockedSuspendedProcesses = []
+        self.readySuspendedProcesses = []

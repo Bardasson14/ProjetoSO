@@ -6,6 +6,20 @@ from .process import Process
 class Scheduler:
     def __init__(self):
         pass
+    
+    def checkProcessIO(self, process, printers, disks):
+        avaliablePrinters = len([x for x in printers if x.avaliable])
+        avaliableDisks = len([x for x in disks if x.avaliable])
+        if (avaliablePrinters >= process.printers and avaliableDisks >= process.disk):
+            return True
+        return False
+
+
+    def admitProcess(self, process, system):
+        if (self.checkProcessIO(process, system.printers, system.disks)):
+            system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
+        else:
+            system.memory.blockedProcesses.append(process)
 
     def chooseNext(self, memory):
         if( memory.criticalProcesses ): return memory.criticalProcesses[0]
@@ -34,6 +48,10 @@ class Scheduler:
             nextProcessQueue = self.getProcessQueue(nextProcess.id, memory)
             dispatcher.dispatchProcess(cpus[_avaliableCPUIndex], memory, nextProcessQueue)
             _avaliableCPUIndex = self.checkAvaliableCPUS(cpus, False)
+    
+    def manageBlockedQueue(self):
+        #t minimo para ser suspenso: 5 unidades de tempo
+        pass
                 
     def checkAvaliableCPUS(self, cpus, userProcessesIncluded):
         #retorna primeira CPU disponível. Caso não haja nenhuma, retorna None (caso processos de usuário sejam incluidos, seu indice é retornado)
@@ -59,19 +77,16 @@ class Scheduler:
             if avaliableCPUIndex == None:
                 return #Nesse caso, não há CPU com processo de usuário nem vaga
             if (not cpus[avaliableCPUIndex].empty):  #CPU executando processo de usuário
-                print(avaliableCPUIndex)
-                print(cpus[avaliableCPUIndex].lastQueueIndex)
                 dispatcher.interruptProcess(cpus[avaliableCPUIndex], memory, self)
-                
             #inserir criticalProcess na CPU
             dispatcher.dispatchProcess(cpus[avaliableCPUIndex], memory, 4)
                     
             
-    def checkEntries(self, jobList, currentTime, dispatcher, memory): #OK
+    def checkEntries(self, jobList, currentTime, dispatcher, system): #OK
             while (jobList and jobList[0]['arrivalTime'] == currentTime):
                 processInput = jobList.pop(0)
-                newProcess = dispatcher.createProcess(processInput['arrivalTime'], processInput['priority'], processInput['serviceTime'], processInput['size'], processInput['printers'], processInput['disk'], memory)
-                dispatcher.admitProcess(newProcess, memory)
+                newProcess = dispatcher.createProcess(processInput['arrivalTime'], processInput['priority'], processInput['serviceTime'], processInput['size'], processInput['printers'], processInput['disk'], system.memory)
+                self.admitProcess(newProcess, system)
 
     def checkQuantum(self, system, currentTime, dispatcher): #necessário passar o sistema como param, pois existem os processos bloqueados, suspensos, etc.
         cpus = system.CPUs

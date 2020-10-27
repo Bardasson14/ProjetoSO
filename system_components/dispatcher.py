@@ -12,11 +12,7 @@ class Dispatcher:
             memory.avaliableMemory -= size
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
-    def admitProcess(self, process, memory):
-        memory.criticalProcesses.append(process) if process.priority == 0 else memory.rq0.append(process)
-
     def dispatchProcess(self, cpu, memory, queue):
-
         if (0<=queue<=2):
             process = memory.rq[queue].pop(0)
         else:
@@ -41,5 +37,7 @@ class Dispatcher:
             targetQueue = 0
         else:
             targetQueue +=1
+        memory.rq[targetQueue].append(cpu.currentProcess)
         #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
         cpu.reset()
+

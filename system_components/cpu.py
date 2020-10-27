@@ -1,6 +1,6 @@
 from .resource import Resource
 
-class CPU(Resource):
+class CPU():
 
     def __init__(self, currentProcess):
         self.currentProcess = currentProcess
