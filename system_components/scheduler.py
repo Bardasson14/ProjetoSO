@@ -27,7 +27,7 @@ class Scheduler:
     def manageReadyQueues(self, memory, cpus, dispatcher):
         #checar ready queues até encaixar o máximo possível de processos de usuário
         _avaliableCPUIndex = self.checkAvaliableCPUS(cpus, False)
-        while (_avaliableCPUIndex):
+        while (_avaliableCPUIndex != None):
             nextProcess = self.chooseNext(memory)
             if not nextProcess:
                 return
@@ -57,11 +57,9 @@ class Scheduler:
             avaliableCPUIndex = self.checkAvaliableCPUS(cpus, True)
             if avaliableCPUIndex == None:
                 return #Nesse caso, não há CPU com processo de usuário nem vaga
-            if (not cpus[avaliableCPUIndex].empty): 
-                #CPU ocupada com processo de User
-                #devolver processo de user para a MP
-                #[FAZER]    
-                pass
+            if (not cpus[avaliableCPUIndex].empty):  #CPU executando processo de usuário
+                dispatcher.interruptProcess(cpus[avaliableCPUIndex], memory, self)
+                
             #inserir criticalProcess na CPU
             dispatcher.dispatchProcess(cpus[avaliableCPUIndex], memory, 4)
                     
@@ -74,8 +72,8 @@ class Scheduler:
 
     def checkQuantum(self, system, currentTime, dispatcher): #necessário passar o sistema como param, pois existem os processos bloqueados, suspensos, etc.
         cpus = system.CPUs
-
-        if self.checkAvaliableCPUS(cpus, False) == None:
+        avaliableCPU = self.checkAvaliableCPUS(cpus, False)
+        if avaliableCPU: #se houver CPU disponível, não é necessário realizar preempção no processo
             return
 
         for cpu in cpus:

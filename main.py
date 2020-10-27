@@ -45,7 +45,7 @@ def loop(system, sort_p):
         #checar se há processo crítico -> Scheduler
         scheduler.manageCriticalProcesses(system.memory, system.CPUs, dispatcher) #corrigir
 
-        #gerenciar filas de processos de usuário
+        #gerenciar filas de processos de usuário, admitindo para a memória aqueles que possam ser executados, e suspendendo outros
         scheduler.manageReadyQueues(system.memory, system.CPUs, dispatcher)
 
 
