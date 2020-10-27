@@ -19,7 +19,7 @@ def main():
             # p.append(row)
             parsed_row = list(map(int, row.split(', ')))
             p.append({'arrivalTime': parsed_row[0], 'priority': parsed_row[1], 'serviceTime': parsed_row[2],
-                      'size': parsed_row[3], 'printers': parsed_row[4], 'disk': parsed_row[4]})
+                      'size': parsed_row[3], 'printers': parsed_row[4], 'disk': parsed_row[5]})
     # adicionar a vetor auxiliar ordenado p/ ordem de chegada do processo
     #sort_p = [p.sort(key = lambda x: x['arrivalTime']) for i in range(len(p))]
 
@@ -39,7 +39,7 @@ def avaliableProcesses(system, jobList):
         if (len(rqi) > 0):
             return True
 
-    if (memory.criticalProcesses or memory.blockedProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
+    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
         return True
 
     return False
@@ -66,8 +66,7 @@ def loop(system, sort_p):
         scheduler.checkQuantum(system, currentTime, dispatcher)
 
         # checar se há processo crítico -> Scheduler
-        scheduler.manageCriticalProcesses(
-            system, dispatcher)  # corrigir
+        scheduler.manageCriticalProcesses(system, dispatcher)
 
         # gerenciar filas de processos de usuário, admitindo para a memória aqueles que possam ser executados, e suspendendo outros
         scheduler.manageReadyQueues(system, dispatcher)
@@ -79,13 +78,16 @@ def loop(system, sort_p):
             print('RQ', i)
             for process in system.memory.rq[i]:
                 print(process.__dict__)
+        print()
         print('Critical Processes')
         for process in system.memory.criticalProcesses:
             print(process.__dict__)
+        print()
         for i in range(len(system.CPUs)):
             print('CPU', i)
             if not system.CPUs[i].empty:
                 print(system.CPUs[i].currentProcess.__dict__)
+        print()
         print('BLOCKED PROCESSES')
         for process in system.memory.blockedProcesses:
             print(process.__dict__)

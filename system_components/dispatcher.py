@@ -43,7 +43,7 @@ class Dispatcher:
         #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
         cpu.reset()
 
-    def blockProcesss(self, memory, queue):
+    def blockProcess(self, memory, queue):
         process = memory.rq[queue].pop(0) #apenas processos de usuário podem ser bloqueados, já que processos críticos são CPU-bound
         process.currentStatus = ProcessState.BLOCKED
         process.currentStatusTime = 0

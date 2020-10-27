@@ -16,10 +16,8 @@ class Scheduler:
         return False
 
     def admitProcess(self, process, system):
-        if (self.checkProcessIO(process, system.printers, system.disks)):
-            system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
-        else:
-            system.memory.blockedProcesses.append(process)
+        system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
+    
 
     def chooseNext(self, memory):
         if( memory.criticalProcesses ): return memory.criticalProcesses[0]
@@ -30,9 +28,9 @@ class Scheduler:
     def checkFinished(self, system, dispatcher):
         for cpu in system.CPUs:
             if (not cpu.empty and (cpu.currentProcess.serviceTimeLeft == 0)):
-                dispatcher.finishProcess(cpu)
                 if (cpu.currentProcess.priority == 1):
-                    self.manageResources(system.printers, system.disks, False)
+                    self.freeResources(cpu.currentProcess, system.printers, system.disks)
+                dispatcher.finishProcess(cpu)
             
     def getProcessQueue(self, id, memory):
         for i in range (len(memory.rq)):
@@ -44,18 +42,13 @@ class Scheduler:
         #checar ready queues até encaixar o máximo possível de processos de usuário
         avaliableCPUIndex = self.checkAvaliableCPUS(system.CPUs, False)
         while (avaliableCPUIndex != None):
-            print('av_cpu_index', avaliableCPUIndex)
             nextProcess = self.chooseNext(system.memory)
             if not nextProcess:
                 return
             nextProcessQueue = self.getProcessQueue(nextProcess.id, system.memory)
-            #print('npqueue', nextProcessQueue)
-            #print('np', nextProcess.__dict__)
-            #print('rq0', system.memory.rq[0])
-            print('check: ', self.checkProcessIO(nextProcess, system.printers, system.disks))
             if (self.checkProcessIO(nextProcess, system.printers, system.disks)):
                 dispatcher.dispatchProcess(system.CPUs[avaliableCPUIndex], system.memory, nextProcessQueue)
-                self.manageResources(nextProcess, system.printers, system.disks, False)
+                self.allocateResources(nextProcess, system.printers, system.disks)
             else:
                 dispatcher.blockProcess(system.memory, nextProcessQueue)
             avaliableCPUIndex = self.checkAvaliableCPUS(system.CPUs, False)
@@ -64,22 +57,34 @@ class Scheduler:
         #t minimo para ser suspenso: 5 unidades de tempo
         pass
 
-    #CORRIGIR
-    def manageResources(process, printers, free): #free é False quando houver alocação, e True quando houver liberação de MP
+    #Era possível utilizar apenas um método para alocar e liberar recursos, porém esta maneira é mais legível
+    def allocateResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
-        i = 0
-        while n_printers < process.printers:
-            if (printers[i].avaliable):
-                printers[i].avaliable = free
+
+        for i in range(2):
+            if  n_printers < process.printers and printers[i].avaliable:
+                printers[i].avaliable = False
                 n_printers += 1
-            i += 1 
-        i = 0
-        while n_disks < process.disk:
-            if (printers[i].avaliable):
-                printers[i].avaliable = free
+
+        for i in range (2):
+            if n_disks < process.disk and disks[i].avaliable:
+                disks[i].avaliable = False
                 n_disks += 1
-            i += 1
+    
+    def freeResources(self, process, printers, disks):
+        n_printers = 0
+        n_disks = 0
+
+        for i in range(2):
+            if  n_printers < process.printers and not printers[i].avaliable:
+                printers[i].avaliable = True
+                n_printers += 1
+
+        for i in range (2):
+            if n_disks < process.disk and not disks[i].avaliable:
+                disks[i].avaliable = True
+                n_disks += 1
                 
     def checkAvaliableCPUS(self, cpus, userProcessesIncluded): #userProcessesIncluded = True p/ Processos Críticos
         userProcessCPU = None
