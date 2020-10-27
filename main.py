@@ -21,10 +21,7 @@ def main():
             p.append({'arrivalTime': parsed_row[0], 'priority': parsed_row[1], 'serviceTime': parsed_row[2],
                       'size': parsed_row[3], 'printers': parsed_row[4], 'disk': parsed_row[5]})
     # adicionar a vetor auxiliar ordenado p/ ordem de chegada do processo
-    #sort_p = [p.sort(key = lambda x: x['arrivalTime']) for i in range(len(p))]
-
-    # p não passou por nenhuma ordenação
-    loop(sys, p)
+    loop(sys, sorted(p, key = lambda x: x['arrivalTime']))
 
 
 def avaliableProcesses(system, jobList):
@@ -39,7 +36,7 @@ def avaliableProcesses(system, jobList):
         if (len(rqi) > 0):
             return True
 
-    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
+    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList): #incluir processos bloqueados
         return True
 
     return False
@@ -53,14 +50,14 @@ def loop(system, sort_p):
 
     while avaliableProcesses(system, sort_p):
 
-        # AINDA É NECESSÁRIO FAZER A VERIFICAÇÃO PARA POSSÍVEIS EVENTOS BLOQUEANTES
-        # USAR FILA DE PROCESSOS BLOQUEADOS
+        # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
+        scheduler.checkFinished(system, dispatcher)
+
+        # VERIFICAR POSSÍVEIS DESBLOQUEIOS        
+        scheduler.manageBlockedQueue(system, dispatcher)
 
         # CHECAR CHEGADA DE NOVOS PROCESSOS
         scheduler.checkEntries(sort_p, currentTime, dispatcher, system)
-
-        # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
-        scheduler.checkFinished(system, dispatcher)
 
         # CHECAR QUANTUM PARA REALIZAR PREEMPÇÃO, SE NECESSÁRIO
         scheduler.checkQuantum(system, currentTime, dispatcher)
@@ -88,7 +85,7 @@ def loop(system, sort_p):
             if not system.CPUs[i].empty:
                 print(system.CPUs[i].currentProcess.__dict__)
         print()
-        print('BLOCKED PROCESSES')
+        print('Blocked Processes')
         for process in system.memory.blockedProcesses:
             print(process.__dict__)
 
@@ -108,6 +105,9 @@ def loop(system, sort_p):
         for rqi in system.memory.rq:
             for process in rqi:
                 process.currentStatusTime += 1
+
+        for process in system.memory.blockedProcesses:
+            process.currentStatusTime += 1
 
 
 main()

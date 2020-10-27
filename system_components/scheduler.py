@@ -7,10 +7,13 @@ class Scheduler:
     def __init__(self):
         pass
     
-    def checkProcessIO(self, process, printers, disks): #CHECAGEM NA HORA DA ADMISSÃO E NA HORA DO DISPATCH
+    def getAvaliableIO (self, printers, disks):
         avaliablePrinters = len([printer for printer in printers if printer.avaliable])
         avaliableDisks = len([disk for disk in disks if disk.avaliable])
-        print([avaliableDisks, avaliablePrinters])
+        return [avaliablePrinters, avaliableDisks]
+
+    def checkProcessIO(self, process, printers, disks): #CHECAGEM NA HORA DA ADMISSÃO E NA HORA DO DISPATCH
+        avaliablePrinters, avaliableDisks = self.getAvaliableIO(printers, disks)
         if (avaliablePrinters >= process.printers and avaliableDisks >= process.disk):
             return True
         return False
@@ -53,10 +56,22 @@ class Scheduler:
                 dispatcher.blockProcess(system.memory, nextProcessQueue)
             avaliableCPUIndex = self.checkAvaliableCPUS(system.CPUs, False)
     
-    def manageBlockedQueue(self):
+    def manageBlockedQueue(self, system, dispatcher):
         #t minimo para ser suspenso: 5 unidades de tempo
-        pass
+        avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
+        originalBlockedLength = len(system.memory.blockedProcesses)
+        for i in range(originalBlockedLength):
+            print('CHECOU')
+            process = system.memory.blockedProcesses[0]
+            if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
+                avaliablePrinters -= process.printers
+                avaliableDisks -= process.disk
+                dispatcher.unblockProcess(system.memory, process)
+            
+            if (avaliablePrinters == 0 and avaliableDisks == 0):
+                return
 
+        
     #Era possível utilizar apenas um método para alocar e liberar recursos, porém esta maneira é mais legível
     def allocateResources(self, process, printers, disks):
         n_printers = 0

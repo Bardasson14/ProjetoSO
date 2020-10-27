@@ -14,7 +14,6 @@ class Dispatcher:
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
     def dispatchProcess(self, cpu, memory, queue):
-        print('nq', queue)
         if (queue != None):
             process = memory.rq[queue].pop(0) 
         else:
@@ -48,4 +47,14 @@ class Dispatcher:
         process.currentStatus = ProcessState.BLOCKED
         process.currentStatusTime = 0
         memory.blockedProcesses.append(process)
+
+    def unblockProcess(self, memory, process):
+        processIndex = memory.blockedProcesses.index(process)
+        del memory.blockedProcesses[processIndex]
+        memory.rq0.append(process)
+        process.currentStatus = ProcessState.READY
+        process.currentStatusTime = 0
+        
             
+    def suspendProcess():
+        pass
