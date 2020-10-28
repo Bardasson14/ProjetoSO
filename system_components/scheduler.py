@@ -122,8 +122,7 @@ class Scheduler:
                 dispatcher.interruptProcess(system.CPUs[avaliableCPUIndex], system.memory, self)
             #inserir criticalProcess na CPU
             dispatcher.dispatchProcess(system.CPUs[avaliableCPUIndex], system.memory, None)
-                    
-            
+                                
     def checkEntries(self, jobList, currentTime, dispatcher, system): #OK
             while (jobList and jobList[0]['arrivalTime'] == currentTime):
                 processInput = jobList.pop(0)
