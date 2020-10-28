@@ -46,8 +46,7 @@ def loop(system, sort_p):
     scheduler = schedulerModule.Scheduler()
     dispatcher = dispatcherModule.Dispatcher()
     currentTime = 0
-    # loop deve ser executado até que último processo seja finalizado - TIMER AINDA NÃO IMPLEMENTADO
-
+    
     while avaliableProcesses(system, sort_p):
 
         # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
