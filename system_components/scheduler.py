@@ -14,7 +14,6 @@ class Scheduler:
 
     def checkProcessIO(self, process, printers, disks):
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(printers, disks)
-        print('RECURSOS DISPONIVEIS', avaliablePrinters, avaliableDisks)
         if (avaliablePrinters >= process.printers and avaliableDisks >= process.disk):
             return True
         return False
