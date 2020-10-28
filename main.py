@@ -105,7 +105,7 @@ def loop(system, sort_p):
         for cpu in system.CPUs:
             if (cpu.currentProcess != None):
                 cpu.currentProcess.currentStatusTime += 1
-                cpu.currentProcess.serviceTimeLeft -= 1
+                cpu.currentProcess.remainingTIme -= 1
 
         # ATUALIZAR TEMPO DE ESPERA DOS PROCESSOS NA MP
 

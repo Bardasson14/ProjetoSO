@@ -29,7 +29,7 @@ class Scheduler:
 
     def checkFinished(self, system, dispatcher):
         for cpu in system.CPUs:
-            if (not cpu.empty and (cpu.currentProcess.serviceTimeLeft == 0)):
+            if (not cpu.empty and (cpu.currentProcess.remainingTIme == 0)):
                 if (cpu.currentProcess.priority == 1):
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)   
                 dispatcher.finishProcess(cpu)
@@ -69,7 +69,6 @@ class Scheduler:
             if (avaliablePrinters == 0 and avaliableDisks == 0):
                 return
 
-        
     def allocateResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
@@ -97,7 +96,6 @@ class Scheduler:
                 disks[i].avaliable = True
                 n_disks += 1
                 
-        
     def checkAvaliableCPUS(self, cpus, userProcessesIncluded): #userProcessesIncluded = True p/ Processos Críticos
         userProcessCPU = None
         for i in range(len(cpus)):
@@ -107,7 +105,6 @@ class Scheduler:
                 userProcessCPU = i
         if (userProcessesIncluded):
             return userProcessCPU #priorizar a busca por CPUs vazias. Caso não haja nenhuma vazia, retornar cpu com processo de usuário
-
 
     def manageCriticalProcesses(self, system, dispatcher):
         if not (system.memory.criticalProcesses):

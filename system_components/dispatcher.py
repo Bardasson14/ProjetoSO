@@ -54,6 +54,5 @@ class Dispatcher:
         process.currentStatus = ProcessState.READY
         process.currentStatusTime = 0
         
-            
     def suspendProcess():
         pass
