@@ -36,7 +36,7 @@ def avaliableProcesses(system, jobList):
         if (len(rqi) > 0):
             return True
 
-    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList): #incluir processos bloqueados
+    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
         return True
 
     return False
