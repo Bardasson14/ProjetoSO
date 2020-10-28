@@ -88,6 +88,14 @@ def loop(system, sort_p):
         print('Blocked Processes')
         for process in system.memory.blockedProcesses:
             print(process.__dict__)
+        print()
+        print('Disks')
+        for disk in system.disks:
+            print(disk.__dict__)
+        print('Printers')
+        for printer in system.printers:
+            print(printer.__dict__)
+
 
         # ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
 

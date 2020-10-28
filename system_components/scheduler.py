@@ -12,7 +12,7 @@ class Scheduler:
         avaliableDisks = len([disk for disk in disks if disk.avaliable])
         return [avaliablePrinters, avaliableDisks]
 
-    def checkProcessIO(self, process, printers, disks): #CHECAGEM NA HORA DA ADMISSÃO E NA HORA DO DISPATCH
+    def checkProcessIO(self, process, printers, disks):
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(printers, disks)
         if (avaliablePrinters >= process.printers and avaliableDisks >= process.disk):
             return True
@@ -21,7 +21,6 @@ class Scheduler:
     def admitProcess(self, process, system):
         system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
     
-
     def chooseNext(self, memory):
         if( memory.criticalProcesses ): return memory.criticalProcesses[0]
         elif( memory.rq0 ): return memory.rq0[0]
@@ -32,7 +31,7 @@ class Scheduler:
         for cpu in system.CPUs:
             if (not cpu.empty and (cpu.currentProcess.serviceTimeLeft == 0)):
                 if (cpu.currentProcess.priority == 1):
-                    self.freeResources(cpu.currentProcess, system.printers, system.disks)
+                    self.freeResources(cpu.currentProcess, system.printers, system.disks)   
                 dispatcher.finishProcess(cpu)
             
     def getProcessQueue(self, id, memory):
@@ -61,7 +60,6 @@ class Scheduler:
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
         originalBlockedLength = len(system.memory.blockedProcesses)
         for i in range(originalBlockedLength):
-            print('CHECOU')
             process = system.memory.blockedProcesses[0]
             if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
                 avaliablePrinters -= process.printers
@@ -72,7 +70,6 @@ class Scheduler:
                 return
 
         
-    #Era possível utilizar apenas um método para alocar e liberar recursos, porém esta maneira é mais legível
     def allocateResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
@@ -87,6 +84,7 @@ class Scheduler:
                 disks[i].avaliable = False
                 n_disks += 1
     
+    #CORRIGIR
     def freeResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
@@ -95,12 +93,12 @@ class Scheduler:
             if  n_printers < process.printers and not printers[i].avaliable:
                 printers[i].avaliable = True
                 n_printers += 1
-
-        for i in range (2):
+                
             if n_disks < process.disk and not disks[i].avaliable:
                 disks[i].avaliable = True
                 n_disks += 1
                 
+        
     def checkAvaliableCPUS(self, cpus, userProcessesIncluded): #userProcessesIncluded = True p/ Processos Críticos
         userProcessCPU = None
         for i in range(len(cpus)):
@@ -124,6 +122,7 @@ class Scheduler:
             if avaliableCPUIndex == None:
                 return #Nesse caso, não há CPU com processo de usuário nem vaga
             if (not system.CPUs[avaliableCPUIndex].empty):  #CPU executando processo de usuário
+                self.freeResources(system.CPUs[avaliableCPUIndex].currentProcess, system.printers, system.disks)
                 dispatcher.interruptProcess(system.CPUs[avaliableCPUIndex], system.memory, self)
             #inserir criticalProcess na CPU
             dispatcher.dispatchProcess(system.CPUs[avaliableCPUIndex], system.memory, None)
@@ -145,6 +144,8 @@ class Scheduler:
             if (cpu.currentProcess and cpu.currentProcess.priority == 1 and cpu.currentProcess.currentStatusTime % 2 == 0):
                 nextProcess = self.chooseNext(system.memory)
                 if (nextProcess):
+                    #ADICIONAR LIBERACAO DE RECURSO
+                    self.freeResources(cpu.currentProcess, system.printers, system.disks)
                     dispatcher.interruptProcess(cpu, system.memory, self) 
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
                     
