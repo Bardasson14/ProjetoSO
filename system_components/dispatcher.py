@@ -56,3 +56,6 @@ class Dispatcher:
         
     def suspendProcess():
         pass
+
+    def activateProcess():
+        pass

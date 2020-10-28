@@ -78,7 +78,6 @@ class Scheduler:
                 printers[i].avaliable = False
                 n_printers += 1
 
-        for i in range (2):
             if n_disks < process.disk and disks[i].avaliable:
                 disks[i].avaliable = False
                 n_disks += 1
