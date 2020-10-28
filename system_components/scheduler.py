@@ -14,6 +14,7 @@ class Scheduler:
 
     def checkProcessIO(self, process, printers, disks):
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(printers, disks)
+        print('RECURSOS DISPONIVEIS', avaliablePrinters, avaliableDisks)
         if (avaliablePrinters >= process.printers and avaliableDisks >= process.disk):
             return True
         return False
@@ -84,7 +85,6 @@ class Scheduler:
                 disks[i].avaliable = False
                 n_disks += 1
     
-    #CORRIGIR
     def freeResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
@@ -139,7 +139,6 @@ class Scheduler:
         avaliableCPU = self.checkAvaliableCPUS(cpus, False)
         if avaliableCPU: #se houver CPU disponível, não é necessário realizar preempção no processo
             return
-
         for cpu in cpus:
             if (cpu.currentProcess and cpu.currentProcess.priority == 1 and cpu.currentProcess.currentStatusTime % 2 == 0):
                 nextProcess = self.chooseNext(system.memory)
@@ -147,6 +146,7 @@ class Scheduler:
                     #ADICIONAR LIBERACAO DE RECURSO
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)
                     dispatcher.interruptProcess(cpu, system.memory, self) 
+                    self.allocateResources(nextProcess, system.printers, system.disks)
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
                     
 

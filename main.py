@@ -52,11 +52,11 @@ def loop(system, sort_p):
         # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
         scheduler.checkFinished(system, dispatcher)
 
-        # VERIFICAR POSSÍVEIS DESBLOQUEIOS        
-        scheduler.manageBlockedQueue(system, dispatcher)
-
         # CHECAR CHEGADA DE NOVOS PROCESSOS
         scheduler.checkEntries(sort_p, currentTime, dispatcher, system)
+
+        # VERIFICAR POSSÍVEIS DESBLOQUEIOS        
+        scheduler.manageBlockedQueue(system, dispatcher)
 
         # CHECAR QUANTUM PARA REALIZAR PREEMPÇÃO, SE NECESSÁRIO
         scheduler.checkQuantum(system, currentTime, dispatcher)

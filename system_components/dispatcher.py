@@ -18,7 +18,6 @@ class Dispatcher:
             process = memory.rq[queue].pop(0) 
         else:
             process = memory.criticalProcesses.pop(0)
-
         process.currentStatus = ProcessState.RUNNING
         process.currentStatusTime = 0
         cpu.currentProcess = process
