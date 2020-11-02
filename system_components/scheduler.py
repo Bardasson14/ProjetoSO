@@ -29,7 +29,7 @@ class Scheduler:
 
     def checkFinished(self, system, dispatcher):
         for cpu in system.CPUs:
-            if (not cpu.empty and (cpu.currentProcess.remainingTIme == 0)):
+            if (not cpu.empty and (cpu.currentProcess.remainingTime == 0)):
                 if (cpu.currentProcess.priority == 1):
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)
                 dispatcher.finishProcess(cpu)
@@ -173,6 +173,6 @@ class Scheduler:
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)
                     dispatcher.interruptProcess(cpu, system.memory, self)
                     self.allocateResources(nextProcess, system.printers, system.disks)
-                    dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
 
+                    dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
 

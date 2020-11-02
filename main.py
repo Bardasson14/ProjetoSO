@@ -47,7 +47,9 @@ def loop(system, sort_p):
     dispatcher = dispatcherModule.Dispatcher()
     currentTime = 0
 
-    while avaliableProcesses(system, sort_p):
+    continueExecution = 's'
+
+    while avaliableProcesses(system, sort_p) and continueExecution == 's':
 
         # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
         scheduler.checkFinished(system, dispatcher)
@@ -91,9 +93,11 @@ def loop(system, sort_p):
         print('Blocked Processes')
         for process in system.memory.blockedProcesses:
             print(process.__dict__)
+        print()
         print('Suspended-Blocked Processes')
         for process in system.memory.suspendedBlockedProcesses:
             print(process.__dict__)
+        print()
         print('Ready-Suspended Processes')
         for process in system.memory.readySuspendedProcesses:
             print(process.__dict__)
@@ -115,7 +119,7 @@ def loop(system, sort_p):
         for cpu in system.CPUs:
             if (cpu.currentProcess != None):
                 cpu.currentProcess.currentStatusTime += 1
-                cpu.currentProcess.remainingTIme -= 1
+                cpu.currentProcess.remainingTime -= 1
 
         # ATUALIZAR TEMPO DE ESPERA DOS PROCESSOS NA MP
 
@@ -132,4 +136,8 @@ def loop(system, sort_p):
         for process in system.memory.readySuspendedProcesses:
             process.currentStatusTime += 1
 
+        continueExecution = input('Continuar? Pressione S/s para continuar, qualquer outra tecla para a execução:   ')
+        continueExecution = continueExecution.lower()
+
+    print('Execução finalizada.')
 main()

@@ -18,7 +18,7 @@ class Process:
         self.priority = priority
         self.size = size
         self.serviceTime = serviceTime
-        self.remainingTIme = serviceTime #podemos eliminar e usar apenas serviceTime também, cabe discussão
+        self.remainingTime = serviceTime #podemos eliminar e usar apenas serviceTime também, cabe discussão
         self.printers = printers
         self.disk = disk
         self.currentStatus = ProcessState.NEW
