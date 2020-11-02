@@ -6,7 +6,7 @@ from .process import Process
 class Scheduler:
     def __init__(self):
         pass
-    
+
     def getAvaliableIO (self, printers, disks):
         avaliablePrinters = len([printer for printer in printers if printer.avaliable])
         avaliableDisks = len([disk for disk in disks if disk.avaliable])
@@ -20,7 +20,7 @@ class Scheduler:
 
     def admitProcess(self, process, system):
         system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
-    
+
     def chooseNext(self, memory):
         if( memory.criticalProcesses ): return memory.criticalProcesses[0]
         elif( memory.rq0 ): return memory.rq0[0]
@@ -31,9 +31,9 @@ class Scheduler:
         for cpu in system.CPUs:
             if (not cpu.empty and (cpu.currentProcess.remainingTIme == 0)):
                 if (cpu.currentProcess.priority == 1):
-                    self.freeResources(cpu.currentProcess, system.printers, system.disks)   
+                    self.freeResources(cpu.currentProcess, system.printers, system.disks)
                 dispatcher.finishProcess(cpu)
-            
+
     def getProcessQueue(self, id, memory):
         for i in range (len(memory.rq)):
                 for process in memory.rq[i]:
@@ -54,7 +54,7 @@ class Scheduler:
             else:
                 dispatcher.blockProcess(system.memory, nextProcessQueue)
             avaliableCPUIndex = self.checkAvaliableCPUS(system.CPUs, False)
-    
+
     def manageBlockedQueue(self, system, dispatcher):
         #t minimo para ser suspenso: 5 unidades de tempo
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
@@ -65,7 +65,39 @@ class Scheduler:
                 avaliablePrinters -= process.printers
                 avaliableDisks -= process.disk
                 dispatcher.unblockProcess(system.memory, process)
-            
+
+            if (avaliablePrinters == 0 and avaliableDisks == 0):
+                return
+
+            if( process.currentStatusTime >= 5 ):
+
+                dispatcher.suspendBlockedProcess(system.memory, process)
+
+    def manageReadySuspendedQueue(self, system, dispatcher):
+
+        numberOfSuspendedProcesses = len(system.memory.readySuspendedProcesses)
+
+        for i in range(numberOfSuspendedProcesses-1, -1, -1):
+
+            proc = system.memory.readySuspendedProcesses[i]
+
+            if( system.memory.availableMemory >= proc.size ):
+
+                dispatcher.activateProcess(system.memory, proc)
+
+    def manageSuspendedBlockedQueue(self, system, dispatcher):
+
+        avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
+        originalSuspendedBlockedLength = len(system.memory.suspendedBlockedProcesses)
+
+        for i in range(originalSuspendedBlockedLength-1, -1, -1):
+
+            process = system.memory.suspendedBlockedProcesses[0]
+            if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
+                avaliablePrinters -= process.printers
+                avaliableDisks -= process.disk
+                dispatcher.readySuspendedProcess(system.memory, process)
+
             if (avaliablePrinters == 0 and avaliableDisks == 0):
                 return
 
@@ -81,7 +113,7 @@ class Scheduler:
             if n_disks < process.disk and disks[i].avaliable:
                 disks[i].avaliable = False
                 n_disks += 1
-    
+
     def freeResources(self, process, printers, disks):
         n_printers = 0
         n_disks = 0
@@ -90,11 +122,11 @@ class Scheduler:
             if  n_printers < process.printers and not printers[i].avaliable:
                 printers[i].avaliable = True
                 n_printers += 1
-                
+
             if n_disks < process.disk and not disks[i].avaliable:
                 disks[i].avaliable = True
                 n_disks += 1
-                
+
     def checkAvaliableCPUS(self, cpus, userProcessesIncluded): #userProcessesIncluded = True p/ Processos Críticos
         userProcessCPU = None
         for i in range(len(cpus)):
@@ -108,7 +140,7 @@ class Scheduler:
     def manageCriticalProcesses(self, system, dispatcher):
         if not (system.memory.criticalProcesses):
             return
-        
+
         for i in range(4): #NO MÁXIMO, HAVERÃO 4 CPUs DISPONÍVEIS (como a checagem é por clock, não é necessário checar mais do que 4 vezes)
             if not system.memory.criticalProcesses:
                 return
@@ -121,7 +153,7 @@ class Scheduler:
                 dispatcher.interruptProcess(system.CPUs[avaliableCPUIndex], system.memory, self)
             #inserir criticalProcess na CPU
             dispatcher.dispatchProcess(system.CPUs[avaliableCPUIndex], system.memory, None)
-                                
+
     def checkEntries(self, jobList, currentTime, dispatcher, system): #OK
             while (jobList and jobList[0]['arrivalTime'] == currentTime):
                 processInput = jobList.pop(0)
@@ -139,8 +171,8 @@ class Scheduler:
                 if (nextProcess):
                     #ADICIONAR LIBERACAO DE RECURSO
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)
-                    dispatcher.interruptProcess(cpu, system.memory, self) 
+                    dispatcher.interruptProcess(cpu, system.memory, self)
                     self.allocateResources(nextProcess, system.printers, system.disks)
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
-                    
+
 

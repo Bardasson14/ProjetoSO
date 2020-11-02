@@ -36,7 +36,7 @@ def avaliableProcesses(system, jobList):
         if (len(rqi) > 0):
             return True
 
-    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
+    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.suspendedBlockedProcesses or jobList):
         return True
 
     return False
@@ -46,7 +46,7 @@ def loop(system, sort_p):
     scheduler = schedulerModule.Scheduler()
     dispatcher = dispatcherModule.Dispatcher()
     currentTime = 0
-    
+
     while avaliableProcesses(system, sort_p):
 
         # PERCORRER CPUS PARA CHECAR TÉRMINO DE PROCESSOS
@@ -57,6 +57,10 @@ def loop(system, sort_p):
 
         # VERIFICAR POSSÍVEIS DESBLOQUEIOS        
         scheduler.manageBlockedQueue(system, dispatcher)
+
+        scheduler.manageSuspendedBlockedQueue(system, dispatcher)
+
+        scheduler.manageReadySuspendedQueue(system, dispatcher)
 
         # CHECAR QUANTUM PARA REALIZAR PREEMPÇÃO, SE NECESSÁRIO
         scheduler.checkQuantum(system, currentTime, dispatcher)
@@ -87,6 +91,12 @@ def loop(system, sort_p):
         print('Blocked Processes')
         for process in system.memory.blockedProcesses:
             print(process.__dict__)
+        print('Suspended-Blocked Processes')
+        for process in system.memory.suspendedBlockedProcesses:
+            print(process.__dict__)
+        print('Ready-Suspended Processes')
+        for process in system.memory.readySuspendedProcesses:
+            print(process.__dict__)
         print()
         print('Disks')
         for disk in system.disks:
@@ -94,7 +104,7 @@ def loop(system, sort_p):
         print('Printers')
         for printer in system.printers:
             print(printer.__dict__)
-
+        print('Available Memory', system.memory.availableMemory)
 
         # ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
 
@@ -116,5 +126,10 @@ def loop(system, sort_p):
         for process in system.memory.blockedProcesses:
             process.currentStatusTime += 1
 
+        for process in system.memory.suspendedBlockedProcesses:
+            process.currentStatusTime += 1
+
+        for process in system.memory.readySuspendedProcesses:
+            process.currentStatusTime += 1
 
 main()
