@@ -142,5 +142,3 @@ class Scheduler:
                     dispatcher.interruptProcess(cpu, system.memory, self) 
                     self.allocateResources(nextProcess, system.printers, system.disks)
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
-                    
-
