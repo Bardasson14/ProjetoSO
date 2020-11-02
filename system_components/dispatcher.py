@@ -13,7 +13,7 @@ class Dispatcher:
 
         self.getMemoryForNewProcess(memory, size, priority)
 
-        return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
+        return Process(id, arrivalTime, priority, serviceTime, size, printers, disk, None)
 
     def dispatchProcess(self, cpu, memory, queue):
 
@@ -62,15 +62,15 @@ class Dispatcher:
         process.currentStatus = ProcessState.READY_SUSPENDED
         process.currentStatusTime = 0
 
-        memory.readySuspendedProcesses.append(memory.suspendedBlockedProcesses.pop(memory.suspendedBlockedProcesses.index(process)))
+        memory.readySuspendedProcesses.append(memory.blockedSuspendedProcesses.pop(memory.blockedSuspendedProcesses.index(process)))
 
     def suspendBlockedProcess(self, memory, process):
 
         process.currentStatus = ProcessState.SUSPENDED_BLOCKED
         process.currentStatusTime = 0
 
-        memory.suspendedBlockedProcesses.append(memory.blockedProcesses.pop(memory.blockedProcesses.index(process)))
-        memory.availableMemory += process.size
+        memory.blockedSuspendedProcesses.append(memory.blockedProcesses.pop(memory.blockedProcesses.index(process)))
+        memory.avaliableMemory += process.size
 
     def activateProcess(self, memory, proc):
 
@@ -79,13 +79,13 @@ class Dispatcher:
 
         memory.rq0.append(memory.readySuspendedProcesses.pop(memory.readySuspendedProcesses.index(proc)))
 
-        memory.availableMemory -= proc.size
+        memory.avaliableMemory -= proc.size
 
     def getMemoryForNewProcess(self, memory, size, priority):
 
         # if we have enough memory for the new process, just take space from MP
-        if( memory.availableMemory >= size ):
-            memory.availableMemory -= size
+        if( memory.avaliableMemory >= size ):
+            memory.avaliableMemory -= size
 
         # if we don't have enough space and this is a user process
         else:
@@ -93,12 +93,12 @@ class Dispatcher:
             # get more space by suspending blocked processes
             for processIndex in range(len(memory.blockedProcesses), 0, -1):
                 self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
-                if( memory.availableMemory >= size ):
+                if( memory.avaliableMemory >= size ):
                     break
 
             # TODO
             # if we still don't have enough memory
-            if( memory.availableMemory < size ):
+            if( memory.avaliableMemory < size ):
 
                 # if this is a critical process
                 if(priority==0):

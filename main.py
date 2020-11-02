@@ -36,7 +36,7 @@ def avaliableProcesses(system, jobList):
         if (len(rqi) > 0):
             return True
 
-    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.suspendedBlockedProcesses or jobList):
+    if (memory.criticalProcesses or memory.readySuspendedProcesses or memory.blockedSuspendedProcesses or jobList):
         return True
 
     return False
@@ -95,7 +95,7 @@ def loop(system, sort_p):
             print(process.__dict__)
         print()
         print('Suspended-Blocked Processes')
-        for process in system.memory.suspendedBlockedProcesses:
+        for process in system.memory.blockedSuspendedProcesses:
             print(process.__dict__)
         print()
         print('Ready-Suspended Processes')
@@ -108,7 +108,10 @@ def loop(system, sort_p):
         print('Printers')
         for printer in system.printers:
             print(printer.__dict__)
-        print('Available Memory', system.memory.availableMemory)
+        print('Available Memory', system.memory.avaliableMemory)
+        for block in system.memory.freeBlocks:
+            print(block)
+            
 
         # ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)
 
@@ -130,11 +133,12 @@ def loop(system, sort_p):
         for process in system.memory.blockedProcesses:
             process.currentStatusTime += 1
 
-        for process in system.memory.suspendedBlockedProcesses:
+        for process in system.memory.blockedSuspendedProcesses:
             process.currentStatusTime += 1
 
         for process in system.memory.readySuspendedProcesses:
             process.currentStatusTime += 1
+
 
         continueExecution = input('Continuar? Pressione S/s para continuar, qualquer outra tecla para a execução:   ')
         continueExecution = continueExecution.lower()

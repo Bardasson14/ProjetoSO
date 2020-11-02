@@ -19,6 +19,10 @@ class Scheduler:
         return False
 
     def admitProcess(self, process, system):
+        if (process.size > 512 and process.priority == 0):
+            return 
+        address = self.checkFreeMemory(process.size, system.memory)
+        self.allocateMemory(process, system.memory, address)
         system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
 
     def chooseNext(self, memory):
@@ -32,6 +36,7 @@ class Scheduler:
             if (not cpu.empty and (cpu.currentProcess.remainingTime == 0)):
                 if (cpu.currentProcess.priority == 1):
                     self.freeResources(cpu.currentProcess, system.printers, system.disks)
+                self.freeMemory(cpu.currentProcess, system.memory)
                 dispatcher.finishProcess(cpu)
 
     def getProcessQueue(self, id, memory):
@@ -70,7 +75,7 @@ class Scheduler:
                 return
 
             if( process.currentStatusTime >= 5 ):
-
+                self.freeMemory(process, system.memory)
                 dispatcher.suspendBlockedProcess(system.memory, process)
 
     def manageReadySuspendedQueue(self, system, dispatcher):
@@ -79,20 +84,21 @@ class Scheduler:
 
         for i in range(numberOfSuspendedProcesses-1, -1, -1):
 
-            proc = system.memory.readySuspendedProcesses[i]
+            process = system.memory.readySuspendedProcesses[i]
+            address = self.checkFreeMemory(process.size, system.memory)
 
-            if( system.memory.availableMemory >= proc.size ):
-
-                dispatcher.activateProcess(system.memory, proc)
+            if address:
+                self.allocateMemory(process, system.memory, address)
+                dispatcher.activateProcess(system.memory, process)
 
     def manageSuspendedBlockedQueue(self, system, dispatcher):
 
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
-        originalSuspendedBlockedLength = len(system.memory.suspendedBlockedProcesses)
+        originalSuspendedBlockedLength = len(system.memory.blockedSuspendedProcesses)
 
         for i in range(originalSuspendedBlockedLength-1, -1, -1):
 
-            process = system.memory.suspendedBlockedProcesses[0]
+            process = system.memory.blockedSuspendedProcesses[0]
             if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
                 avaliablePrinters -= process.printers
                 avaliableDisks -= process.disk
@@ -175,29 +181,33 @@ class Scheduler:
                     self.allocateResources(nextProcess, system.printers, system.disks)
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
 
-    def checkFreeMemory(size, memory):
+    def checkFreeMemory(self, size, memory):
         #foi utilizado o algoritmo de first fit
-        #retorna endereco do bloco com memoria disponivel
+        #retorna endereco do primeiro bloco com memoria disponivel
         for block in memory.freeBlocks:
-            if block.space >= size:
-                return block.address
+            if block['space'] >= size:
+                return block['address']
 
-    def allocateMemory(process, memory):
-        address = self.checkFreeMemory(process.size, memory)
-        if address == None:
-            return
-        selectedBlock = list(filter(memory.freeBlocks, lambda x: x['address']))[0]
-        originalSpace = selectedBlock.space
-        selectedBlock.space -= process.size
-        if (selectedBlock.space != 0):
+    def allocateMemory(self, process, memory, address):
+        for block in memory.freeBlocks:
+            if (block['address'] == address):
+                selectedBlock = block
+                break
+        originalSpace = selectedBlock['space']
+        selectedBlock['space'] -= process.size
+        memory.avaliableMemory -= process.size
+        process.address = selectedBlock['address']
+        if (selectedBlock['space'] != 0):
             #criando novo bloco a partir do que sobrou
-            memory.freeBlocks.append({'address': selectedBlock.address + selectedBlock.space, 'space': originalSpace - process.size})
-            memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
-        else:
-            for block in memory.freeBlocks:
-                if (block.address == address):
-                    del block
-                    return 
+            memory.freeBlocks.append({'address': selectedBlock['address'] + selectedBlock['space'], 'space': originalSpace - process.size})
+            memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address']) #ordenando lista de blocos livres a partir do endereço
 
-        
-
+        for i in range(len(memory.freeBlocks)):
+            if (memory.freeBlocks[i]['address'] == address):
+                del memory.freeBlocks[i] #removendo bloco alocado da lista de livres
+                return
+    
+    def freeMemory(self, process, memory):
+        memory.freeBlocks.append({'address': process.address, 'space': process.size})
+        memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+        memory.avaliableMemory += process.size
