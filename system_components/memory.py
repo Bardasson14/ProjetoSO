@@ -10,3 +10,4 @@ class Memory:
         self.blockedProcesses = []
         self.blockedSuspendedProcesses = []
         self.readySuspendedProcesses = []
+        self.memoryBlocks = [{'address': 0, 'space': 16384}]

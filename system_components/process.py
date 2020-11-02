@@ -11,7 +11,7 @@ class ProcessState(Enum):
 
 class Process:
 
-    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk):
+    def __init__(self, id, arrivalTime, priority, serviceTime, size, printers, disk, address):
         self.id = id
         self.priority = priority
         self.arrivalTime = arrivalTime
@@ -23,3 +23,4 @@ class Process:
         self.disk = disk
         self.currentStatus = ProcessState.NEW
         self.currentStatusTime = 0
+        self.address = address

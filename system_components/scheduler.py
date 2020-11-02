@@ -142,3 +142,30 @@ class Scheduler:
                     dispatcher.interruptProcess(cpu, system.memory, self) 
                     self.allocateResources(nextProcess, system.printers, system.disks)
                     dispatcher.dispatchProcess(cpu, system.memory, self.getProcessQueue(nextProcess.id, system.memory))
+
+    def checkFreeMemory(size, memory):
+        #foi utilizado o algoritmo de first fit
+        #retorna endereco do bloco com memoria disponivel
+        for block in memory.freeBlocks:
+            if block.space >= size:
+                return block.address
+
+    def allocateMemory(process, memory):
+        address = self.checkFreeMemory(process.size, memory)
+        if address == None:
+            return
+        selectedBlock = list(filter(memory.freeBlocks, lambda x: x['address']))[0]
+        originalSpace = selectedBlock.space
+        selectedBlock.space -= process.size
+        if (selectedBlock.space != 0):
+            #criando novo bloco a partir do que sobrou
+            memory.freeBlocks.append({'address': selectedBlock.address + selectedBlock.space, 'space': originalSpace - process.size})
+            memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+        else:
+            for block in memory.freeBlocks:
+                if (block.address == address):
+                    del block
+                    return 
+
+        
+

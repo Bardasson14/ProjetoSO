@@ -59,3 +59,5 @@ class Dispatcher:
 
     def activateProcess():
         pass
+
+    def allocateMemory():
