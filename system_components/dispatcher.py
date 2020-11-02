@@ -1,4 +1,4 @@
-from random import choice
+from random import choice;
 from string import ascii_letters
 from .process import Process, ProcessState
 
@@ -8,14 +8,17 @@ class Dispatcher:
         pass
 
     def createProcess(self, arrivalTime, priority, serviceTime, size, printers, disk, memory):
+
         id = ''.join(choice(ascii_letters) for i in range(10))
-        if ((priority == 1 and size<=512) or (priority==0)) and (memory.avaliableMemory >= size):
-            memory.avaliableMemory -= size #PRECISARÁ SER MODIFICADO    
+
+        self.getMemoryForNewProcess(memory, size, priority)
+
         return Process(id, arrivalTime, priority, serviceTime, size, printers, disk)
 
     def dispatchProcess(self, cpu, memory, queue):
+
         if (queue != None):
-            process = memory.rq[queue].pop(0) 
+            process = memory.rq[queue].pop(0)
         else:
             process = memory.criticalProcesses.pop(0)
         process.currentStatus = ProcessState.RUNNING
@@ -27,7 +30,7 @@ class Dispatcher:
     def finishProcess(self, cpu):
         cpu.currentProcess.currentStatus = ProcessState.FINISHED
         cpu.reset()
-        
+
     def interruptProcess(self, cpu, memory, scheduler):
         cpu.currentProcess.currentStatus = ProcessState.READY
         cpu.currentProcess.currentStatusTime = 0
@@ -53,11 +56,56 @@ class Dispatcher:
         memory.rq0.append(process)
         process.currentStatus = ProcessState.READY
         process.currentStatusTime = 0
-        
-    def suspendProcess():
-        pass
 
-    def activateProcess():
-        pass
+    def readySuspendedProcess(self, memory, process):
 
-    def allocateMemory():
+        process.currentStatus = ProcessState.READY_SUSPENDED
+        process.currentStatusTime = 0
+
+        memory.readySuspendedProcesses.append(memory.suspendedBlockedProcesses.pop(memory.suspendedBlockedProcesses.index(process)))
+
+    def suspendBlockedProcess(self, memory, process):
+
+        process.currentStatus = ProcessState.SUSPENDED_BLOCKED
+        process.currentStatusTime = 0
+
+        memory.suspendedBlockedProcesses.append(memory.blockedProcesses.pop(memory.blockedProcesses.index(process)))
+        memory.availableMemory += process.size
+
+    def activateProcess(self, memory, proc):
+
+        proc.currentStatus = ProcessState.READY
+        proc.currentStatusTime = 0
+
+        memory.rq0.append(memory.readySuspendedProcesses.pop(memory.readySuspendedProcesses.index(proc)))
+
+        memory.availableMemory -= proc.size
+
+    def getMemoryForNewProcess(self, memory, size, priority):
+
+        # if we have enough memory for the new process, just take space from MP
+        if( memory.availableMemory >= size ):
+            memory.availableMemory -= size
+
+        # if we don't have enough space and this is a user process
+        else:
+
+            # get more space by suspending blocked processes
+            for processIndex in range(len(memory.blockedProcesses), 0, -1):
+                self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
+                if( memory.availableMemory >= size ):
+                    break
+
+            # TODO
+            # if we still don't have enough memory
+            if( memory.availableMemory < size ):
+
+                # if this is a critical process
+                if(priority==0):
+
+                    pass
+
+                # if this is an user process
+                elif(priority==1):
+
+                    pass

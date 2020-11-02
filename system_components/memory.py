@@ -1,7 +1,7 @@
 class Memory:
     def __init__(self):
         self.totalMemory = 16384
-        self.avaliableMemory = 16384
+        self.availableMemory = 16384
         self.criticalProcesses = []
         self.rq0 = []
         self.rq1 = []
