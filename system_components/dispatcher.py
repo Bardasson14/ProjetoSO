@@ -84,6 +84,34 @@ class Dispatcher:
     def getMemoryForNewProcess(self, memory, size, priority):
 
         # if we have enough memory for the new process, just take space from MP
+        #if( memory.avaliableMemory >= size ):
+        #    memory.avaliableMemory -= size
+
+        # if we don't have enough space and this is a user process
+        if (memory.avaliableMemory < size):
+
+            # get more space by suspending blocked processes
+            for processIndex in range(len(memory.blockedProcesses)-1, -1, -1):
+                self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
+                if( memory.avaliableMemory >= size ):
+                    break
+
+            # if we still don't have enough memory
+            if( memory.avaliableMemory < size ):
+
+                # get more space by sending ready process to ready-suspended queue
+                for rq in memory.rq[::-1]:
+
+                    for processIndex in range(len(rq)-1, -1, -1):
+                        self.readySuspendedProcess(memory, rq[processIndex], rq)
+                        memory.avaliableMemory += rq[processIndex].size
+                        if( memory.avaliableMemory >= size ):
+                            break
+
+'''
+def getMemoryForNewProcess(self, memory, size, priority):
+
+        # if we have enough memory for the new process, just take space from MP
 
         # REMOVIDO - DUPLICADO
         # if( memory.avaliableMemory >= size ):
@@ -98,7 +126,6 @@ class Dispatcher:
                 if( memory.avaliableMemory >= size ):
                     break
 
-            # TODO
             # if we still don't have enough memory
             if( memory.avaliableMemory < size ):
 
@@ -111,3 +138,4 @@ class Dispatcher:
                 elif(priority==1):
 
                     pass
+                '''
