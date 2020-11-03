@@ -189,7 +189,6 @@ class Scheduler:
                 return block['address']
 
     def allocateMemory(self, process, memory, address):
-        print('avm', memory.avaliableMemory)
         for block in memory.freeBlocks:
             if (block['address'] == address):
                 selectedBlock = block
@@ -210,7 +209,6 @@ class Scheduler:
                 return
     
     def freeMemory(self, process, memory):
-        print('avm', memory.avaliableMemory)
         memory.freeBlocks.append({'address': process.address, 'space': process.size})
         memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
         memory.avaliableMemory += process.size
