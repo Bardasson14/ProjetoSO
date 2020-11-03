@@ -108,9 +108,12 @@ def loop(system, sort_p):
         print('Printers')
         for printer in system.printers:
             print(printer.__dict__)
+            
+        '''
         print('Available Memory', system.memory.avaliableMemory)
         for block in system.memory.freeBlocks:
             print(block)
+        '''
             
 
         # ATUALIZAÇÕES DE STATUS (CONTADORES DE EXECUCAO, ATUALIZACAO DE PROCESSOS BLOQUEADOS, SUSPENSOS ETC.)

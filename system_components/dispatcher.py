@@ -91,7 +91,7 @@ class Dispatcher:
         else:
 
             # get more space by suspending blocked processes
-            for processIndex in range(len(memory.blockedProcesses), 0, -1):
+            for processIndex in range(len(memory.blockedProcesses), -1, -1):
                 self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
                 if( memory.avaliableMemory >= size ):
                     break
