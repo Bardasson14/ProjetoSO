@@ -20,7 +20,7 @@ class Scheduler:
 
     def admitProcess(self, process, system):
         if (process.size > 512 and process.priority == 0):
-            return 
+            return
         address = self.checkFreeMemory(process.size, system.memory)
         self.allocateMemory(process, system.memory, address)
         system.memory.criticalProcesses.append(process) if process.priority == 0 else system.memory.rq0.append(process)
@@ -71,12 +71,12 @@ class Scheduler:
                 avaliableDisks -= process.disk
                 dispatcher.unblockProcess(system.memory, process)
 
-            if (avaliablePrinters == 0 and avaliableDisks == 0):
-                return
-
             if( process.currentStatusTime >= 5 ):
                 self.freeMemory(process, system.memory)
                 dispatcher.suspendBlockedProcess(system.memory, process)
+
+            if (avaliablePrinters == 0 and avaliableDisks == 0):
+                return
 
     def manageReadySuspendedQueue(self, system, dispatcher):
 
@@ -102,7 +102,7 @@ class Scheduler:
             if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
                 avaliablePrinters -= process.printers
                 avaliableDisks -= process.disk
-                dispatcher.readySuspendedProcess(system.memory, process)
+                dispatcher.readySuspendedProcess(system.memory, process, system.memory.blockedSuspendedProcesses)
 
             if (avaliablePrinters == 0 and avaliableDisks == 0):
                 return
@@ -208,7 +208,7 @@ class Scheduler:
                 del memory.freeBlocks[i] #removendo bloco alocado da lista de livres
                 return
         '''
-
+        
     def freeMemory(self, process, memory):
         memory.freeBlocks.append({'address': process.address, 'space': process.size})
         memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
