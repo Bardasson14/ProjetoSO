@@ -87,8 +87,9 @@ class Scheduler:
             process = system.memory.readySuspendedProcesses[i]
             address = self.checkFreeMemory(process.size, system.memory)
 
-            if address:
+            if address != None:
                 self.allocateMemory(process, system.memory, address)
+                #ESTAVA DIMINUINDO AVALIABLE MEMORY 2X
                 dispatcher.activateProcess(system.memory, process)
 
     def manageSuspendedBlockedQueue(self, system, dispatcher):
@@ -189,14 +190,17 @@ class Scheduler:
                 return block['address']
 
     def allocateMemory(self, process, memory, address):
+
         for block in memory.freeBlocks:
             if (block['address'] == address):
                 selectedBlock = block
                 break
+
         originalSpace = selectedBlock['space']
         selectedBlock['space'] = process.size
-        memory.avaliableMemory -= process.size
         process.address = selectedBlock['address']
+        memory.avaliableMemory -= process.size
+
         if (originalSpace - process.size != 0):
             #criando novo bloco a partir do que sobrou
             memory.freeBlocks.append({'address': selectedBlock['address'] + selectedBlock['space'], 'space': originalSpace - process.size})
@@ -210,13 +214,43 @@ class Scheduler:
     def freeMemory(self, process, memory):
 
         addNew = True
+
+        #print('PROCESSO LIBERADO')
+        #print(process.__dict__)
+        #print('BLOCO A SER LIBERADO')
+        #print('ADDRESS: ', process.address, 'SIZE: ', process.size)
+        freeBlocksTotal = len(memory.freeBlocks)
+        memory.adjustFreeBlocks()
+        for i in range (0, freeBlocksTotal):
+
+            #bloco tem seu final coincidente com inicio do processo
+            if memory.freeBlocks[i]['address'] + memory.freeBlocks[i]['space'] == process.address:
+                memory.freeBlocks[i]['space'] += process.size
+                addNew = False
+                break
+            
+            #bloco tem seu inicio coincidente com o final do processo
+            elif memory.freeBlocks[i]['address'] == process.address + process.size:
+                memory.freeBlocks[i]['address'] = process.address
+                memory.freeBlocks[i]['space'] += process.size
+                addNew = False
+                break
+
+        #bloco isolado
+        if addNew:
+            memory.freeBlocks.append({'address': process.address, 'space': process.size})
+            #memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+        memory.adjustFreeBlocks()
+        memory.avaliableMemory += process.size
+
+'''
         for block in memory.freeBlocks:
             # Quando logo em cima tem um bloco já liberado, só atualiza
             if block['address'] + block['space'] == process.address:
                 block['space'] += process.size
                 addNew = False
                 break
-            # Quando logo a baixo tem um bloco já liberado, só atualiza
+            # Quando logo abaixo tem um bloco já liberado, só atualiza
             elif block['address'] == process.address + process.size:
                 block['space'] += process.size
                 block['address'] = process.address
@@ -229,3 +263,4 @@ class Scheduler:
             memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
 
         memory.avaliableMemory += process.size
+        '''

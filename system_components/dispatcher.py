@@ -36,24 +36,30 @@ class Dispatcher:
         cpu.currentProcess.currentStatusTime = 0
         processQueueIndex = scheduler.getProcessQueue(cpu.currentProcess.id, memory) #só vale para processos de usuário, que podem ser interrompidos
         targetQueue = cpu.lastQueueIndex
+        
         if (targetQueue == 2):
             targetQueue = 0
         else:
             targetQueue +=1
+        
         memory.rq[targetQueue].append(cpu.currentProcess)
         #devolver a fila de prontos seguinte a anterior. se processo estava na ultima fila, voltará para fila inicial
         cpu.reset()
 
     def blockProcess(self, memory, queue):
         process = memory.rq[queue].pop(0) #apenas processos de usuário podem ser bloqueados, já que processos críticos são CPU-bound
+        
         process.currentStatus = ProcessState.BLOCKED
         process.currentStatusTime = 0
+        
         memory.blockedProcesses.append(process)
 
     def unblockProcess(self, memory, process):
         processIndex = memory.blockedProcesses.index(process)
         del memory.blockedProcesses[processIndex]
+        
         memory.rq0.append(process)
+        
         process.currentStatus = ProcessState.READY
         process.currentStatusTime = 0
 
@@ -61,33 +67,22 @@ class Dispatcher:
 
         process.currentStatus = ProcessState.READY_SUSPENDED
         process.currentStatusTime = 0
-
         memory.readySuspendedProcesses.append(originQueue.pop(originQueue.index(process)))
 
     def suspendBlockedProcess(self, memory, process):
-
+        process.address = None
         process.currentStatus = ProcessState.SUSPENDED_BLOCKED
         process.currentStatusTime = 0
-
         memory.blockedSuspendedProcesses.append(memory.blockedProcesses.pop(memory.blockedProcesses.index(process)))
-        memory.avaliableMemory += process.size
-
+        
     def activateProcess(self, memory, proc):
 
         proc.currentStatus = ProcessState.READY
         proc.currentStatusTime = 0
-
         memory.rq0.append(memory.readySuspendedProcesses.pop(memory.readySuspendedProcesses.index(proc)))
-
-        memory.avaliableMemory -= proc.size
 
     def getMemoryForNewProcess(self, memory, size, priority):
 
-        # if we have enough memory for the new process, just take space from MP
-        #if( memory.avaliableMemory >= size ):
-        #    memory.avaliableMemory -= size
-
-        # if we don't have enough space and this is a user process
         if (memory.avaliableMemory < size):
 
             # get more space by suspending blocked processes
@@ -107,35 +102,3 @@ class Dispatcher:
                         memory.avaliableMemory += rq[processIndex].size
                         if( memory.avaliableMemory >= size ):
                             break
-
-'''
-def getMemoryForNewProcess(self, memory, size, priority):
-
-        # if we have enough memory for the new process, just take space from MP
-
-        # REMOVIDO - DUPLICADO
-        # if( memory.avaliableMemory >= size ):
-        #     memory.avaliableMemory -= size
-
-        # if we don't have enough space and this is a user process
-        if (memory.avaliableMemory < size) :
-
-            # get more space by suspending blocked processes
-            for processIndex in range(len(memory.blockedProcesses), 0, -1):
-                self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
-                if( memory.avaliableMemory >= size ):
-                    break
-
-            # if we still don't have enough memory
-            if( memory.avaliableMemory < size ):
-
-                # if this is a critical process
-                if(priority==0):
-
-                    pass
-
-                # if this is an user process
-                elif(priority==1):
-
-                    pass
-                '''

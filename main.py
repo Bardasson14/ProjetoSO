@@ -108,9 +108,9 @@ def loop(system, sort_p):
         print('Printers')
         for printer in system.printers:
             print(printer.__dict__)
-            
-        
-        print('Available Memory', system.memory.avaliableMemory)
+        print()
+        print('Available Memory:', system.memory.avaliableMemory)
+        print()
         for block in system.memory.freeBlocks:
             print(block)
             
@@ -142,8 +142,9 @@ def loop(system, sort_p):
             process.currentStatusTime += 1
 
 
-        continueExecution = input('Continuar? Pressione S/s para continuar, qualquer outra tecla para a execução:   ')
+        continueExecution = input('Continuar? Pressione S/s para continuar, qualquer outra tecla interrompe a execução:   ')
         continueExecution = continueExecution.lower()
 
     print('Execução finalizada.')
+
 main()
