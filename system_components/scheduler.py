@@ -242,25 +242,3 @@ class Scheduler:
             #memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
         memory.adjustFreeBlocks()
         memory.avaliableMemory += process.size
-
-'''
-        for block in memory.freeBlocks:
-            # Quando logo em cima tem um bloco já liberado, só atualiza
-            if block['address'] + block['space'] == process.address:
-                block['space'] += process.size
-                addNew = False
-                break
-            # Quando logo abaixo tem um bloco já liberado, só atualiza
-            elif block['address'] == process.address + process.size:
-                block['space'] += process.size
-                block['address'] = process.address
-                addNew = False
-                break
-
-        # Só crio um novo bloco livre
-        if addNew:
-            memory.freeBlocks.append({'address': process.address, 'space': process.size})
-            memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
-
-        memory.avaliableMemory += process.size
-        '''
