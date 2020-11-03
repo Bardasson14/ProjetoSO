@@ -57,12 +57,12 @@ class Dispatcher:
         process.currentStatus = ProcessState.READY
         process.currentStatusTime = 0
 
-    def readySuspendedProcess(self, memory, process):
+    def readySuspendedProcess(self, memory, process, originQueue):
 
         process.currentStatus = ProcessState.READY_SUSPENDED
         process.currentStatusTime = 0
 
-        memory.readySuspendedProcesses.append(memory.blockedSuspendedProcesses.pop(memory.blockedSuspendedProcesses.index(process)))
+        memory.readySuspendedProcesses.append(originQueue.pop(originQueue.index(process)))
 
     def suspendBlockedProcess(self, memory, process):
 
@@ -91,21 +91,19 @@ class Dispatcher:
         else:
 
             # get more space by suspending blocked processes
-            for processIndex in range(len(memory.blockedProcesses), 0, -1):
+            for processIndex in range(len(memory.blockedProcesses)-1, -1, -1):
                 self.suspendBlockedProcess(memory, memory.blockedProcesses[processIndex])
                 if( memory.avaliableMemory >= size ):
                     break
 
-            # TODO
             # if we still don't have enough memory
             if( memory.avaliableMemory < size ):
 
-                # if this is a critical process
-                if(priority==0):
+                # get more space by sending ready process to ready-suspended queue
+                for rq in memory.rq[::-1]:
 
-                    pass
-
-                # if this is an user process
-                elif(priority==1):
-
-                    pass
+                    for processIndex in range(len(rq)-1, -1, -1):
+                        self.readySuspendedProcess(memory, rq[processIndex], rq)
+                        memory.avaliableMemory += rq[processIndex].size
+                        if( memory.avaliableMemory >= size ):
+                            break
