@@ -1,8 +1,6 @@
 from .memory import Memory
 from .process import Process
-#from .dispatcher import Dispatcher
 
-#Scheduler irá implementar apenas a política escolha do próximo processo, mas sem efetivamente realizar alterações
 class Scheduler:
     def __init__(self):
         pass
@@ -65,7 +63,9 @@ class Scheduler:
         avaliablePrinters, avaliableDisks = self.getAvaliableIO(system.printers, system.disks)
         originalBlockedLength = len(system.memory.blockedProcesses)
         for i in range(originalBlockedLength):
-            process = system.memory.blockedProcesses[0]
+            if i>=len(system.memory.blockedProcesses):
+                return 
+            process = system.memory.blockedProcesses[i]
             if (process.printers <= avaliablePrinters and process.disk <= avaliableDisks):
                 avaliablePrinters -= process.printers
                 avaliableDisks -= process.disk
@@ -89,7 +89,6 @@ class Scheduler:
 
             if address != None:
                 self.allocateMemory(process, system.memory, address)
-                #ESTAVA DIMINUINDO AVALIABLE MEMORY 2X
                 dispatcher.activateProcess(system.memory, process)
 
     def manageSuspendedBlockedQueue(self, system, dispatcher):
@@ -215,10 +214,6 @@ class Scheduler:
 
         addNew = True
 
-        #print('PROCESSO LIBERADO')
-        #print(process.__dict__)
-        #print('BLOCO A SER LIBERADO')
-        #print('ADDRESS: ', process.address, 'SIZE: ', process.size)
         freeBlocksTotal = len(memory.freeBlocks)
         memory.adjustFreeBlocks()
         for i in range (0, freeBlocksTotal):
@@ -236,9 +231,8 @@ class Scheduler:
                 addNew = False
                 break
 
-        #bloco isolado
         if addNew:
             memory.freeBlocks.append({'address': process.address, 'space': process.size})
-            #memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+            
         memory.adjustFreeBlocks()
         memory.avaliableMemory += process.size
