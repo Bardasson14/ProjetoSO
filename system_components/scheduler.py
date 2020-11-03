@@ -197,7 +197,6 @@ class Scheduler:
         selectedBlock['space'] = process.size
         memory.avaliableMemory -= process.size
         process.address = selectedBlock['address']
-
         if (originalSpace - process.size != 0):
             #criando novo bloco a partir do que sobrou
             memory.freeBlocks.append({'address': selectedBlock['address'] + selectedBlock['space'], 'space': originalSpace - process.size})
@@ -207,8 +206,26 @@ class Scheduler:
             if (memory.freeBlocks[i]['address'] == address):
                 del memory.freeBlocks[i] #removendo bloco alocado da lista de livres
                 return
-    
+
     def freeMemory(self, process, memory):
-        memory.freeBlocks.append({'address': process.address, 'space': process.size})
-        memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+
+        addNew = True
+        for block in memory.freeBlocks:
+            # Quando logo em cima tem um bloco já liberado, só atualiza
+            if block['address'] + block['space'] == process.address:
+                block['space'] += process.size
+                addNew = False
+                break
+            # Quando logo a baixo tem um bloco já liberado, só atualiza
+            elif block['address'] == process.address + process.size:
+                block['space'] += process.size
+                block['address'] = process.address
+                addNew = False
+                break
+
+        # Só crio um novo bloco livre
+        if addNew:
+            memory.freeBlocks.append({'address': process.address, 'space': process.size})
+            memory.freeBlocks = sorted(memory.freeBlocks, key = lambda x: x['address'])
+
         memory.avaliableMemory += process.size
